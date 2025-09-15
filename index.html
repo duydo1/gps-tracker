@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>GPS Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    #map {
+      width: 100%;
+      height: 90vh;
+    }
+    #pos {
+      padding: 10px;
+      background: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <h2>📍 GPS Tracker Demo</h2>
+  <p id="pos">Đang lấy vị trí...</p>
+  <div id="map"></div>
+
+  <!-- Load Google Maps -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+  <script>
+    let map, marker;
+
+    function initMap(lat, lon) {
+      const position = { lat, lng: lon };
+      map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 15,
+        center: position,
+      });
+      marker = new google.maps.Marker({
+        position,
+        map,
+        title: "Vị trí hiện tại"
+      });
+    }
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.watchPosition(pos => {
+        let lat = pos.coords.latitude;
+        let lon = pos.coords.longitude;
+        document.getElementById("pos").innerText =
+          `Lat: ${lat}, Lon: ${lon}`;
+
+        if (!map) {
+          initMap(lat, lon);
+        } else {
+          let newPos = { lat, lng: lon };
+          map.setCenter(newPos);
+          marker.setPosition(newPos);
+        }
+
+        // Gửi dữ liệu về server (tùy bạn triển khai sau)
+        /*
+        fetch("https://your-server.com/api/position", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lat, lon })
+        });
+        */
+      },
+      err => {
+        document.getElementById("pos").innerText = "Lỗi GPS: " + err.message;
+      });
+    } else {
+      document.getElementById("pos").innerText = "Thiết bị không hỗ trợ GPS.";
+    }
+  </script>
+</body>
+</html>
