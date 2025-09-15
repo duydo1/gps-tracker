@@ -1,77 +1,49 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>GPS Tracker</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    #map {
-      width: 100%;
-      height: 90vh;
-    }
-    #pos {
-      padding: 10px;
-      background: #f0f0f0;
-    }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    #map { height: 100vh; width: 100%; }
   </style>
 </head>
 <body>
-  <h2>📍 GPS Tracker Demo</h2>
-  <p id="pos">Đang lấy vị trí...</p>
+  <h2 style="text-align:center;">My GPS Tracker</h2>
   <div id="map"></div>
 
-  <!-- Load Google Maps -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
   <script>
-    let map, marker;
-
-    function initMap(lat, lon) {
-      const position = { lat, lng: lon };
+    let map;
+    function initMap() {
       map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 0, lng: 0 },
         zoom: 15,
-        center: position,
       });
-      marker = new google.maps.Marker({
-        position,
-        map,
-        title: "Vị trí hiện tại"
-      });
-    }
 
-    if ("geolocation" in navigator) {
-      navigator.geolocation.watchPosition(pos => {
-        let lat = pos.coords.latitude;
-        let lon = pos.coords.longitude;
-        document.getElementById("pos").innerText =
-          `Lat: ${lat}, Lon: ${lon}`;
-
-        if (!map) {
-          initMap(lat, lon);
-        } else {
-          let newPos = { lat, lng: lon };
-          map.setCenter(newPos);
-          marker.setPosition(newPos);
-        }
-
-        // Gửi dữ liệu về server (tùy bạn triển khai sau)
-        /*
-        fetch("https://your-server.com/api/position", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lat, lon })
-        });
-        */
-      },
-      err => {
-        document.getElementById("pos").innerText = "Lỗi GPS: " + err.message;
-      });
-    } else {
-      document.getElementById("pos").innerText = "Thiết bị không hỗ trợ GPS.";
+      if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(
+          (position) => {
+            const pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            };
+            map.setCenter(pos);
+            new google.maps.Marker({
+              position: pos,
+              map: map,
+              title: "You are here!",
+            });
+          },
+          () => {
+            alert("Geolocation failed or denied.");
+          }
+        );
+      } else {
+        alert("Geolocation not supported by your browser.");
+      }
     }
   </script>
 </body>
